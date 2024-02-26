@@ -16,15 +16,15 @@ struct ContentView: View {
                 }
             HomeView()
                 .tabItem {
-                    Label("news", systemImage: "square.text.square.fill")
+                    Label("News", systemImage: "square.text.square.fill")
                 }
             HomeView()
                 .tabItem {
                     Label("Club", systemImage: "star")
                 }
-            HomeView()
+            LecturesView()
                 .tabItem {
-                    Label("Lecture", systemImage: "books.vertical.fill")
+                    Label("Lectures", systemImage: "books.vertical.fill")
                 }
         }
     }
