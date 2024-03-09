@@ -57,7 +57,7 @@ struct HomeView: View {
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        request.httpBody = messageText.data(using: .utf8)
+        request.httpBody = "<s>[INST] \(messageText) [/INST]".data(using: .utf8)
         let task = URLSession.shared.dataTask(with: request) { data, response, error in
             // Handle errors
             if let error = error {

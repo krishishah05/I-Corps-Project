@@ -14,11 +14,11 @@ struct ContentView: View {
                 .tabItem {
                     Label("Home", systemImage: "person")
                 }
-            HomeView()
+            NewsView()
                 .tabItem {
                     Label("News", systemImage: "square.text.square.fill")
                 }
-            HomeView()
+            ClubView()
                 .tabItem {
                     Label("Club", systemImage: "star")
                 }
