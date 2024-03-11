@@ -51,26 +51,34 @@ struct HomeView: View {
     private func sendMessage() {
         guard !messageText.isEmpty else { return }
         viewModel.addMessage(messageText, isIncoming: false)
-        guard let url = URL(string: "https://w7xu2c05r1.execute-api.us-east-2.amazonaws.com/prod/mistral") else {
+        guard let url = URL(string: "https://api-inference.huggingface.co/models/mistralai/Mixtral-8x7B-Instruct-v0.1") else {
             fatalError("Invalid URL")
         }
-        var request = URLRequest(url: url)
-        request.httpMethod = "POST"
-        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        request.httpBody = "<s>[INST] \(messageText) [/INST]".data(using: .utf8)
-        let task = URLSession.shared.dataTask(with: request) { data, response, error in
-            // Handle errors
-            if let error = error {
-                print("Error: \(error)")
-                return
-            }
+        do {
+            var request = URLRequest(url: url)
+            request.httpMethod = "POST"
+            request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+            let jsonData = try JSONSerialization.data(withJSONObject: ["inputs": "<s>[INST] \(messageText) [/INST]"], options: [])
+            request.httpBody = jsonData
+            let task = URLSession.shared.dataTask(with: request) { data, response, error in
+                // Handle errors
+                if let error = error {
+                    print("Error: \(error)")
+                    return
+                }
 
-            // Parse the response and add it as an incoming message
-            if let data = data, let responseMessage = String(data: data, encoding: .utf8) {
-                viewModel.addMessage(responseMessage, isIncoming: true)
+                // Parse the response and add it as an incoming message
+                if let data = data, let response = String(data: data, encoding: .utf8), let range = response.range(of: "[/INST]") {
+                    var responseMessage = String(response[range.upperBound...])
+                    // Remove the last 3 characters `"}]`
+                    responseMessage.removeLast(3)
+                    viewModel.addMessage(responseMessage.trimmingCharacters(in: .whitespaces), isIncoming: true)
+                }
             }
+            task.resume()
+        } catch {
+            print("Error serializing message to JSON: \(error)")
         }
-        task.resume()
         messageText = ""
     }
 }
