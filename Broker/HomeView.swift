@@ -47,7 +47,11 @@ struct HomeView: View {
             .padding()
         }
     }
-
+    
+    struct ResponseItem: Decodable {
+        let generated_text: String
+    }
+    
     private func sendMessage() {
         guard !messageText.isEmpty else { return }
         viewModel.addMessage(messageText, isIncoming: false)
@@ -58,7 +62,7 @@ struct HomeView: View {
             var request = URLRequest(url: url)
             request.httpMethod = "POST"
             request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-            let jsonData = try JSONSerialization.data(withJSONObject: ["inputs": "<s>[INST] \(messageText) [/INST]"], options: [])
+            let jsonData = try JSONSerialization.data(withJSONObject: ["inputs": "<s> [INST] \(messageText) [/INST]"], options: [])
             request.httpBody = jsonData
             let task = URLSession.shared.dataTask(with: request) { data, response, error in
                 // Handle errors
@@ -66,13 +70,20 @@ struct HomeView: View {
                     print("Error: \(error)")
                     return
                 }
-
-                // Parse the response and add it as an incoming message
-                if let data = data, let response = String(data: data, encoding: .utf8), let range = response.range(of: "[/INST]") {
-                    var responseMessage = String(response[range.upperBound...])
-                    // Remove the last 3 characters `"}]`
-                    responseMessage.removeLast(3)
-                    viewModel.addMessage(responseMessage.trimmingCharacters(in: .whitespaces), isIncoming: true)
+                
+                guard let data = data else {
+                    print("No data in response")
+                    return
+                }
+                do {
+                    let decodedData = try JSONDecoder().decode([ResponseItem].self, from: data)
+                    if let firstItem = decodedData.first {
+                        if let range = firstItem.generated_text.range(of: "[/INST]") {
+                            viewModel.addMessage(firstItem.generated_text[range.upperBound...].trimmingCharacters(in: .whitespaces), isIncoming: true)
+                        }
+                    }
+                } catch {
+                    print("Error decoding JSON: \(error)")
                 }
             }
             task.resume()
