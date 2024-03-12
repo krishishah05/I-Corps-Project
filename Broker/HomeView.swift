@@ -28,21 +28,23 @@ struct HomeView: View {
                     ForEach(viewModel.messages) { message in
                         MessageBubble(message: message)
                     }
-                    .onChange(of: viewModel.messages.count) { _ in
-                        value.scrollTo(viewModel.messages.last?.id)
+                    .onChange(of: viewModel.messages.count) {
+                        if let lastMessageId = viewModel.messages.last?.id {
+                            value.scrollTo(lastMessageId, anchor: .bottom)
+                        }
                     }
                 }
                 .padding()
             }
 
             HStack {
-                TextField("Type a message", text: $messageText)
-                    .textFieldStyle(RoundedBorderTextFieldStyle())
-                    .frame(minHeight: CGFloat(30))
+                TextField("Type a message...", text: $messageText)
+                    .padding()
 
                 Button(action: sendMessage) {
                     Text("Send")
                 }
+                .padding()
             }
             .padding()
         }
