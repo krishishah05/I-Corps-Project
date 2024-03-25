@@ -25,7 +25,6 @@ struct MessageBubble: View {
             }
         }
         .padding(message.isIncoming ? .leading : .trailing, 20)
-        .transition(.slide)
-        .animation(.easeInOut)
+        .transition(message.isIncoming ? .scale : .slide)
     }
 }
