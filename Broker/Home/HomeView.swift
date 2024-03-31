@@ -97,7 +97,7 @@ struct HomeView: View {
             var request = URLRequest(url: url)
             request.httpMethod = "POST"
             request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-            let jsonData = try JSONSerialization.data(withJSONObject: ["inputs": "<s> [INST] \(inputs) [/INST]"], options: [])
+            let jsonData = try JSONSerialization.data(withJSONObject: ["inputs": "<s> [INST] \(inputs) [/INST]", "parameters": [ "max_new_tokens": 500 ]], options: [])
             request.httpBody = jsonData
             let task = URLSession.shared.dataTask(with: request) { data, response, error in
                 // Handle errors
@@ -133,6 +133,7 @@ struct HomeView: View {
     
     private func sendAudio(filePath: URL) async -> String {
         let url = URL(string: "https://api-inference.huggingface.co/models/openai/whisper-base")!
+        //let url = URL(string: "https://api-inference.huggingface.co/models/openai/whisper-large-v3")!
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
         //request.setValue("application/octet-stream", forHTTPHeaderField: "Content-Type")
